@@ -1,0 +1,195 @@
+{
+  "data": {
+    "symbol": "EURUSD",
+    "input_csv": "data/eurusd.csv",
+    "datetime_column": "datetime",
+    "price_column": "close",
+    "feature_columns": [
+      "open",
+      "high",
+      "low",
+      "close",
+      "volume"
+    ],
+    "frequency": "1H",
+    "synthetic_fallback": true
+  },
+  "walk_forward": {
+    "train_size": 1500,
+    "test_size": 250,
+    "step_size": 250,
+    "max_periods": 6,
+    "expanding": false
+  },
+  "backtest": {
+    "initial_capital": 10000,
+    "transaction_cost_bps": 0.8,
+    "annualization_factor": 6048,
+    "long_threshold": 0.55,
+    "short_threshold": 0.45,
+    "regression_long_threshold": 0.00015,
+    "regression_short_threshold": -0.00015
+  },
+  "features": {
+    "rsi_period": 14,
+    "elliott_window": 34,
+    "volatility_window": 24,
+    "sequence_length": 32,
+    "forecast_horizon": 1,
+    "regime_count": 3
+  },
+  "outputs": {
+    "results_csv": "reports/experiments.csv"
+  },
+  "experiments": [
+    {
+      "name": "baseline_elliott_rsi",
+      "family": "baseline",
+      "task": "signal",
+      "description": "Rule-based Elliott-wave proxy plus RSI confirmation.",
+      "params": {
+        "oversold": 35,
+        "overbought": 65,
+        "trend_window": 34
+      }
+    },
+    {
+      "name": "supervised_mlp_classifier",
+      "family": "mlp",
+      "task": "classification",
+      "description": "Supervised multilayer perceptron direction classifier.",
+      "params": {
+        "hidden_layers": [
+          64,
+          32
+        ],
+        "activation": "relu",
+        "epochs": 40,
+        "learning_rate": 0.001,
+        "dropout": 0.1
+      }
+    },
+    {
+      "name": "supervised_mlp_regressor",
+      "family": "mlp",
+      "task": "regression",
+      "description": "Supervised multilayer perceptron next-return regressor.",
+      "params": {
+        "hidden_layers": [
+          64,
+          32
+        ],
+        "activation": "relu",
+        "epochs": 40,
+        "learning_rate": 0.001,
+        "dropout": 0.1
+      }
+    },
+    {
+      "name": "cnn_classifier",
+      "family": "cnn",
+      "task": "classification",
+      "description": "One-dimensional convolutional direction classifier over rolling feature windows.",
+      "params": {
+        "filters": [
+          32,
+          64
+        ],
+        "kernel_size": 3,
+        "epochs": 35,
+        "learning_rate": 0.001
+      }
+    },
+    {
+      "name": "cnn_regressor",
+      "family": "cnn",
+      "task": "regression",
+      "description": "One-dimensional convolutional next-return regressor over rolling feature windows.",
+      "params": {
+        "filters": [
+          32,
+          64
+        ],
+        "kernel_size": 3,
+        "epochs": 35,
+        "learning_rate": 0.001
+      }
+    },
+    {
+      "name": "gru_classifier",
+      "family": "gru",
+      "task": "classification",
+      "description": "GRU sequence model for directional classification.",
+      "params": {
+        "units": 64,
+        "layers": 1,
+        "epochs": 35,
+        "learning_rate": 0.001
+      }
+    },
+    {
+      "name": "gru_regressor",
+      "family": "gru",
+      "task": "regression",
+      "description": "GRU sequence model for next-return regression.",
+      "params": {
+        "units": 64,
+        "layers": 1,
+        "epochs": 35,
+        "learning_rate": 0.001
+      }
+    },
+    {
+      "name": "transformer_classifier",
+      "family": "transformer",
+      "task": "classification",
+      "description": "Transformer encoder direction classifier.",
+      "params": {
+        "d_model": 64,
+        "heads": 4,
+        "layers": 2,
+        "epochs": 30,
+        "learning_rate": 0.0005
+      }
+    },
+    {
+      "name": "transformer_regressor",
+      "family": "transformer",
+      "task": "regression",
+      "description": "Transformer encoder next-return regressor.",
+      "params": {
+        "d_model": 64,
+        "heads": 4,
+        "layers": 2,
+        "epochs": 30,
+        "learning_rate": 0.0005
+      }
+    },
+    {
+      "name": "unsupervised_regime_filtered_baseline",
+      "family": "regime_filter",
+      "task": "signal",
+      "description": "Elliott + RSI baseline traded only in favorable unsupervised regimes.",
+      "params": {
+        "clustering": "kmeans",
+        "trade_top_regimes": 1,
+        "regime_features": [
+          "return_1",
+          "volatility",
+          "rsi"
+        ]
+      }
+    },
+    {
+      "name": "autoencoder_regime_strategy",
+      "family": "autoencoder_regime",
+      "task": "signal",
+      "description": "Autoencoder-style reconstruction regimes gating the Elliott + RSI baseline.",
+      "params": {
+        "latent_dim": 3,
+        "reconstruction_quantile": 0.65,
+        "epochs": 40
+      }
+    }
+  ]
+}
