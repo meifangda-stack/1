@@ -1,0 +1,9 @@
+data:
+  symbol: EURUSD
+  exchange: FX_IDC
+  interval: 1h
+features:
+  rsi_period: 14
+  swing_window: 5
+backtest:
+  periods_per_year: 6048
